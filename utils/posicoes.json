@@ -1,0 +1,10 @@
+{
+  "nome": [235, 210],
+  "nome_social": [235, 270],
+  "cpf": [235, 320],
+  "data_nascimento": [235, 360],
+  "naturalidade": [235, 405],
+  "sexo": [490, 320],
+  "nacionalidade": [490, 365],
+  "data_validade": [490, 405]
+}
