@@ -1,14 +1,18 @@
 import csv
 import random
+import unicodedata
 from faker import Faker
 from datetime import datetime, timedelta
+
+def remover_acentos(texto):
+    return unicodedata.normalize("NFKD", texto).encode("ASCII", "ignore").decode("utf-8")
 
 def gerar_csv(qtd_itens, nome_arquivo="dados_fakes.csv"):
     fake = Faker("pt_BR")  
     sexos = ["M", "F"]
     cidades = [
         "Almenara", "Belo Horizonte", "Rugim", "Arinos",
-        "São Paulo", "Pedra Grande", "Porto Seguro"
+        "Sao Paulo", "Pedra Grande", "Porto Seguro"
     ]
 
     with open(nome_arquivo, mode="w", encoding="utf-8", newline="") as arquivo:
@@ -25,14 +29,13 @@ def gerar_csv(qtd_itens, nome_arquivo="dados_fakes.csv"):
         ])
 
         for _ in range(qtd_itens):
-            nome = fake.name()
-            nome_social = nome  
+            nome = remover_acentos(fake.name())
+            nome_social = nome
             cpf = fake.cpf()
             data_nascimento = fake.date_of_birth(minimum_age=18, maximum_age=80).strftime("%d/%m/%Y")
-            naturalidade = random.choice(cidades)
+            naturalidade = remover_acentos(random.choice(cidades))
             sexo = random.choice(sexos)
             nacionalidade = "Brasileiro(a)"
-            
             data_validade = (datetime.now() + timedelta(days=random.randint(365, 3650))).strftime("%d/%m/%Y")
 
             escritor.writerow([
@@ -46,7 +49,7 @@ def gerar_csv(qtd_itens, nome_arquivo="dados_fakes.csv"):
                 data_validade
             ])
 
-    print(f"{qtd_itens} registros salvos em '{nome_arquivo}'")
+    print(f"{qtd_itens} registros salvos em '{nome_arquivo}' (sem acentos)")
 
 if __name__ == "__main__":
     gerar_csv(1000)

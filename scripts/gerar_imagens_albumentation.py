@@ -18,7 +18,7 @@ transformacao = A.Compose([
 ])
 
 # Pasta de entrada (onde você colocou suas imagens)
-pasta_entrada = "./db/NEW_RG_FRENTE"
+pasta_entrada = "./db/NEW_RG_Frente"
 
 # Lista todas as imagens da pasta de entrada
 arquivos = os.listdir(pasta_entrada)

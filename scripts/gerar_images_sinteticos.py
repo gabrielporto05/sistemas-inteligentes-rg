@@ -9,7 +9,7 @@ image_base = './imgs/rg_new_exemple_borrada.jpg'
 csv_arquivo = './utils/dados_fakes.csv'
 json_arquivo = './utils/posicoes.json'
 
-pasta_saida = './db/NEW_RG_FRENTE'
+pasta_saida = './db/NEW_RG_Frente'
 
 def gerar_imgs(qtd_imgs, image_base, csv_arquivo, json_arquivo, pasta_saida):
     # Fonte e estilo
