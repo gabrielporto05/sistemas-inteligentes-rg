@@ -12,7 +12,11 @@ python seu_script.py
 ## Se não tiver DIGITAL e tiver QRcode
 
 - novo
-
+- nomes dos campos possuindo a versao so nome do mesmo em ingles (nome/name)
+- nome social 
+- nacionalidade
+- cores dominantes sendo amarelo e azul 
+- 
 ## Se tiver DIGITAL
 
 - antigo
