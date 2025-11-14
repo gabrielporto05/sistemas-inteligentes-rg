@@ -13,10 +13,17 @@ python seu_script.py
 
 - novo
 - nomes dos campos possuindo a versao so nome do mesmo em ingles (nome/name)
-- nome social 
+- nome social
 - nacionalidade
-- cores dominantes sendo amarelo e azul 
-- 
+- cores dominantes sendo amarelo e azul
+
 ## Se tiver DIGITAL
 
 - antigo
+
+
+
+script de suzana para identificar as cores dominantes :
+
+https://suzana-svm.medium.com/extraindo-cores-dominantes-de-uma-imagem-com-python-b277ee948213
+
