@@ -3,7 +3,7 @@
 ```bash
 python3 -m venv venv
 source venv/bin/activate
-pip install faker albumentations
+pip install faker albumentations opencv-python numpy pytesseract
 python seu_script.py
 ```
 
@@ -21,9 +21,6 @@ python seu_script.py
 
 - antigo
 
-
-
 script de suzana para identificar as cores dominantes :
 
 https://suzana-svm.medium.com/extraindo-cores-dominantes-de-uma-imagem-com-python-b277ee948213
-

@@ -10,15 +10,15 @@ os.makedirs(pasta_saida, exist_ok=True)
 
 # Define uma transformação do Albumentation
 transformacao = A.Compose([
-    A.RandomBrightnessContrast(p=0.5),
-    A.RandomRotate90(p=0.5),
-    A.MotionBlur(p=0.3),
-    A.GaussNoise(p=0.3),
-    A.Perspective(p=0.3)
+    A.RandomBrightnessContrast(brightness_limit=0.15, contrast_limit=0.15, p=0.4),
+    A.Rotate(limit=10, border_mode=cv2.BORDER_CONSTANT, value=(255,255,255), p=0.4),
+    A.GaussianBlur(blur_limit=(3, 5), p=0.2),
+    A.GaussNoise(var_limit=(1.0, 15.0), p=0.2),
+    A.HorizontalFlip(p=0.1),
 ])
 
 # Pasta de entrada (onde você colocou suas imagens)
-pasta_entrada = "./db/old_rgs"
+pasta_entrada = "./db/new_rgs"
 
 # Lista todas as imagens da pasta de entrada
 arquivos = os.listdir(pasta_entrada)
