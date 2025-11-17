@@ -3,7 +3,7 @@ import albumentations as A
 import os
 
 # Pasta de saída (onde as imagens transformadas serão salvas)
-pasta_saida = "./db/imagens_transformadas"
+pasta_saida = "./db/new_rgs_transformadas"
 
 # Cria a pasta de saída se não existir
 os.makedirs(pasta_saida, exist_ok=True)
@@ -18,7 +18,7 @@ transformacao = A.Compose([
 ])
 
 # Pasta de entrada (onde você colocou suas imagens)
-pasta_entrada = "./db/NEW_RG_Frente"
+pasta_entrada = "./db/old_rgs"
 
 # Lista todas as imagens da pasta de entrada
 arquivos = os.listdir(pasta_entrada)

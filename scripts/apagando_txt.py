@@ -2,7 +2,7 @@ import os
 import glob
 
 # Caminho da pasta
-pasta = "./db/RG_Frente"
+pasta = "./db/old_rgs"
 
 # Busca todos os arquivos .txx dentro da pasta (inclusive subpastas)
 arquivos = glob.glob(os.path.join(pasta, "**", "*.txt"), recursive=True)

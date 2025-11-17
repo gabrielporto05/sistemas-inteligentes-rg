@@ -2,7 +2,7 @@ import os
 import glob
 
 # Caminho da pasta
-pasta = "./db/RG_Frente"
+pasta = "./db/old_rgs"
 
 # === ETAPA 1: apagar todos os arquivos que terminam com "_gt_segmentation.jpg" ===
 arquivos_gt = glob.glob(os.path.join(pasta, "**", "*_gt_segmentation.jpg"), recursive=True)
