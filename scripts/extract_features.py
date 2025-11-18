@@ -6,7 +6,7 @@ import pytesseract
 import colorgram
 
 # --- CONFIGURAÇÕES --- #
-PASTA_IMAGENS = "./db/rgs"
+PASTA_IMAGENS = "./db/dataset_final"
 ARQUIVO_SAIDA = "./features.csv"
 
 # Templates para detectar QR Code e digital (caso tenha)
@@ -15,18 +15,22 @@ TEMPLATE_DIGITAL = "./utils/template_digital.png"
 
 
 # --- FUNÇÕES DE FEATURES --- #
-
 def detectar_template(img, template_file, limiar=0.5):
     if not os.path.exists(template_file):
-        return 0  # Template não existe → desabilitado
+        return 0  # Template não existe → pula
 
     template = cv2.imread(template_file, 0)
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+
+    # Se o template for maior que a imagem → não dá para comparar
+    if img_gray.shape[0] < template.shape[0] or img_gray.shape[1] < template.shape[1]:
+        return 0
 
     res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
     valor = np.max(res)
 
     return 1 if valor >= limiar else 0
+
 
 
 def extrair_cores(image_path, n=3):
@@ -61,7 +65,6 @@ def extrair_texto(img):
 
 
 # --- PIPELINE PRINCIPAL --- #
-
 def processar_imagens():
     imagens = os.listdir(PASTA_IMAGENS)
 
