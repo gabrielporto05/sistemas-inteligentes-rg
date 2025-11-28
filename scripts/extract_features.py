@@ -71,7 +71,7 @@ def processar_imagens():
 
         writer.writerow([
             "imagem",
-            "classe",           # <-- nova coluna
+            "classe",           
             "tem_qrcode",
             "tem_digital",
             "color1_hex",
@@ -102,7 +102,7 @@ def processar_imagens():
 
             writer.writerow([
                 img_name,
-                classe,  # <-- classe incluída aqui
+                classe, 
                 tem_qr,
                 tem_digital,
                 *cores_hex,
