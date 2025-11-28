@@ -119,7 +119,7 @@ def processar_imagens():
                 classe
             ])
 
-    print("✅ Features extraídas com sucesso →", ARQUIVO_SAIDA)
+    print("Features extraídas com sucesso →", ARQUIVO_SAIDA)
 
 
 if __name__ == "__main__":

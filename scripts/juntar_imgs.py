@@ -49,4 +49,4 @@ for idx, img_path in enumerate(arquivos, start=1):
 
     print(f"✔ {img_path} → {destino}")
 
-print("\n🎉 Dataset final criado em ./db/dataset_final")
+print("\n Dataset final criado em ./db/dataset_final")

@@ -40,7 +40,7 @@ def gerar_imgs(qtd_imgs, image_base, csv_arquivo, json_arquivo, pasta_saida):
         img = cv2.imread(image_base)
 
         if img is None:
-            print(f"❌ Erro ao carregar a imagem base: {image_base}")
+            print(f"Erro ao carregar a imagem base: {image_base}")
             break
 
         # Escreve cada campo na posição certa
@@ -52,7 +52,7 @@ def gerar_imgs(qtd_imgs, image_base, csv_arquivo, json_arquivo, pasta_saida):
         # Salva a imagem
         nome_saida = os.path.join(pasta_saida, f"rg_{i:04d}.jpg")
         cv2.imwrite(nome_saida, img)
-        print(f"✅ Imagem gerada: {nome_saida}")
+        print(f"Imagem gerada: {nome_saida}")
 
     print(f"\n{qtd_imgs} imagens geradas com sucesso em '{pasta_saida}'.")
 
