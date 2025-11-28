@@ -9,7 +9,7 @@ pasta_new = "./db/new_rgs_transformadas"
 pasta_old = "./db/old_rgs"
 
 # Pasta final (saída)
-pasta_final = "./db/dataset_final"
+pasta_final = "./db/dataset_final_classificados"
 
 # Criar pasta final
 os.makedirs(pasta_final, exist_ok=True)
@@ -25,28 +25,35 @@ fake = Faker("pt_BR")
 def gerar_nome():
     return remover_acentos(fake.first_name() + fake.last_name()).replace(" ", "_")
 
-# Coletar todos os arquivos das duas pastas
+# Coletar todos os arquivos com sua classe identificada
 arquivos = []
 
-for pasta in [pasta_new, pasta_old]:
-    for arquivo in os.listdir(pasta):
-        caminho = os.path.join(pasta, arquivo)
-        if os.path.isfile(caminho):
-            arquivos.append(caminho)
+for arquivo in os.listdir(pasta_new):
+    caminho = os.path.join(pasta_new, arquivo)
+    if os.path.isfile(caminho):
+        arquivos.append((caminho, "new"))
+
+for arquivo in os.listdir(pasta_old):
+    caminho = os.path.join(pasta_old, arquivo)
+    if os.path.isfile(caminho):
+        arquivos.append((caminho, "old"))
 
 # Embaralhar
 random.shuffle(arquivos)
 
 print(f"Total de imagens encontradas: {len(arquivos)}")
 
-# Copiar e renomear
-for idx, img_path in enumerate(arquivos, start=1):
+# Copiar e renomear corretamente
+for idx, (img_path, classe) in enumerate(arquivos, start=1):
     nome_aleatorio = gerar_nome()
-    novo_nome = f"{nome_aleatorio}_rg.jpg"
+
+    # novo ou antigo
+    novo_nome = f"{nome_aleatorio}_{classe}_rg.jpg"
+
     destino = os.path.join(pasta_final, novo_nome)
 
     shutil.copy(img_path, destino)
 
     print(f"✔ {img_path} → {destino}")
 
-print("\n Dataset final criado em ./db/dataset_final")
+print("\n Dataset final criado em ./db/dataset_final_classificados")

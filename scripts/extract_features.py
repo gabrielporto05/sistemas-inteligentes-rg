@@ -4,67 +4,65 @@ import csv
 import numpy as np
 import pytesseract
 import colorgram
+import re
 
-# --- CONFIGURAÇÕES --- #
-PASTA_IMAGENS = "./db/dataset_final"
+PASTA_IMAGENS = "./db/dataset_final_classificados"
 ARQUIVO_SAIDA = "./features.csv"
 
-# Templates para detectar QR Code e digital (caso tenha)
 TEMPLATE_QRCODE = "./utils/template_qr.png"
 TEMPLATE_DIGITAL = "./utils/template_digital.png"
 
+def rgb_to_hex(rgb):
+    return "#{:02x}{:02x}{:02x}".format(rgb[0], rgb[1], rgb[2])
 
-# --- FUNÇÕES DE FEATURES --- #
 def detectar_template(img, template_file, limiar=0.5):
     if not os.path.exists(template_file):
-        return 0  # Template não existe → pula
+        return 0
 
     template = cv2.imread(template_file, 0)
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
 
-    # Se o template for maior que a imagem → não dá para comparar
     if img_gray.shape[0] < template.shape[0] or img_gray.shape[1] < template.shape[1]:
         return 0
 
     res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-    valor = np.max(res)
+    return 1 if np.max(res) >= limiar else 0
 
-    return 1 if valor >= limiar else 0
+def extrair_cores_hex(image_path, n=3):
+    try:
+        colors = colorgram.extract(image_path, n)
+    except:
+        return ["#000000", "#000000", "#000000"]
 
-
-
-def extrair_cores(image_path, n=3):
-    colors = colorgram.extract(image_path, n)
-    vetor = []
-
+    hex_colors = []
     for c in colors:
-        vetor.extend([c.rgb.r, c.rgb.g, c.rgb.b])
+        hex_color = rgb_to_hex((c.rgb.r, c.rgb.g, c.rgb.b))
+        hex_colors.append(hex_color)
 
-    # garante tamanho fixo
-    while len(vetor) < 9:
-        vetor.append(0)
+    while len(hex_colors) < 3:
+        hex_colors.append("#000000")
 
-    return vetor
+    return hex_colors
 
-
-def proporcao_cor(img, cor_alvo, tolerancia=30):
-    lower = np.array([max(0, c - tolerancia) for c in cor_alvo])
-    upper = np.array([min(255, c + tolerancia) for c in cor_alvo])
-
-    mask = cv2.inRange(img, lower, upper)
-    return np.sum(mask > 0) / (img.shape[0] * img.shape[1])
-
-
-def extrair_texto(img):
+def extrair_texto_features(img):
     texto = pytesseract.image_to_string(img).upper()
+
     return {
-        "tem_NAME": int("NAME" in texto),
-        "tem_SOCIAL": int("SOCIAL" in texto),
-        "tem_NACIONALIDADE": int("NACIONALIDADE" in texto)
+        "tem_nome": int(bool(re.search(r"\bNOME\b|\bNAME\b", texto))),
+        "tem_nome_social": int(bool(re.search(r"NOME SOCIAL|SOCIAL NAME", texto))),
+        "tem_nacionalidade": int(bool(re.search(r"NACIONALIDADE|PLACE OF BIRTH", texto)))
     }
 
+def obter_classe(img_name: str):
+    nome = img_name.lower()
 
-# --- PIPELINE PRINCIPAL --- #
+    if "old_rg" in nome:
+        return "old"
+    if "new_rg" in nome:
+        return "new"
+
+    return "ilegivel"  # fallback
+
 def processar_imagens():
     imagens = os.listdir(PASTA_IMAGENS)
 
@@ -73,54 +71,47 @@ def processar_imagens():
 
         writer.writerow([
             "imagem",
+            "classe",           # <-- nova coluna
             "tem_qrcode",
             "tem_digital",
-            "color1_r","color1_g","color1_b",
-            "color2_r","color2_g","color2_b",
-            "color3_r","color3_g","color3_b",
-            "prop_amarelo","prop_azul","prop_verde",
-            "tem_NAME","tem_SOCIAL","tem_NACIONALIDADE",
-            "classe"
+            "color1_hex",
+            "color2_hex",
+            "color3_hex",
+            "tem_nome",
+            "tem_nome_social",
+            "tem_nacionalidade"
         ])
 
         for img_name in imagens:
             caminho = os.path.join(PASTA_IMAGENS, img_name)
             img = cv2.imread(caminho)
 
-            # QR code e digital
+            if img is None:
+                print("Erro ao carregar imagem:", img_name)
+                continue
+
+            # Detectar classe baseada no nome do arquivo
+            classe = obter_classe(img_name)
+
+            # Features
             tem_qr = detectar_template(img, TEMPLATE_QRCODE)
             tem_digital = detectar_template(img, TEMPLATE_DIGITAL)
 
-            # Cores dominantes
-            cores = extrair_cores(caminho)
-
-            # Proporção de algumas cores típicas do RG
-            prop_amarelo = proporcao_cor(img, (255, 255, 0))
-            prop_azul = proporcao_cor(img, (0, 0, 255))
-            prop_verde = proporcao_cor(img, (0, 255, 0))
-
-            # OCR
-            texto_features = extrair_texto(img)
-
-            # Classe do arquivo (pelo nome da pasta, editável)
-            classe = "novo" if "new" in PASTA_IMAGENS else "antigo"
+            cores_hex = extrair_cores_hex(caminho)
+            texto_features = extrair_texto_features(img)
 
             writer.writerow([
                 img_name,
+                classe,  # <-- classe incluída aqui
                 tem_qr,
                 tem_digital,
-                *cores,
-                prop_amarelo,
-                prop_azul,
-                prop_verde,
-                texto_features["tem_NAME"],
-                texto_features["tem_SOCIAL"],
-                texto_features["tem_NACIONALIDADE"],
-                classe
+                *cores_hex,
+                texto_features["tem_nome"],
+                texto_features["tem_nome_social"],
+                texto_features["tem_nacionalidade"],
             ])
 
-    print("Features extraídas com sucesso →", ARQUIVO_SAIDA)
-
+    print("\nFeatures extraídas com sucesso →", ARQUIVO_SAIDA)
 
 if __name__ == "__main__":
     processar_imagens()
