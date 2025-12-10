@@ -7,7 +7,7 @@ import colorgram
 import re
 
 PASTA_IMAGENS = "./db/dataset_final_classificados"
-ARQUIVO_SAIDA = "./features_v2.csv"
+ARQUIVO_SAIDA = "./features_v3.csv"
 
 TEMPLATE_QRCODE = "./utils/template_qr.png"
 TEMPLATE_DIGITAL = "./utils/template_digital.png"
@@ -28,7 +28,7 @@ def detectar_template(img, template_file, limiar=0.5):
         return 0
 
     res = cv2.matchTemplate(img_gray, template, cv2.TM_CCOEFF_NORMED)
-    return 1 if np.max(res) >= limiar else 0
+    return int(np.max(res) >= limiar)
 
 
 def extrair_cores_hex(image_path, n=3):
@@ -57,40 +57,25 @@ def extrair_texto_avancado(img):
         "tem_nacionalidade": int("NACIONALIDADE" in texto or "BIRTH" in texto),
         "qtd_palavras": qtd_palavras,
         "qtd_numeros": qtd_numeros,
-        "densidade_texto": qtd_palavras / max(img.shape[0] * img.shape[1], 1)
     }
 
 
-def extrair_histograma(img):
-    chans = cv2.split(img)
-    hist_features = []
-
-    for ch in chans:
-        hist = cv2.calcHist([ch], [0], None, [32], [0, 256])
-        hist = cv2.normalize(hist, hist).flatten()
-        hist_features.extend(hist)
-
-    return hist_features
-
-
 def features_brilho_contraste(img_gray):
-    media = np.mean(img_gray)
-    desvio = np.std(img_gray)
-    return media, desvio
+    return np.mean(img_gray), np.std(img_gray)
 
 
-def proporcao_imagem(img):
-    h, w = img.shape[:2]
-    return w / h, h / w
-
-
-def extrair_bordas(img_gray):
+def extrair_bordas_normalizado(img_gray):
     edges = cv2.Canny(img_gray, 80, 200)
     qtd_bordas = np.sum(edges > 0)
-    return qtd_bordas
+    total_pixels = img_gray.shape[0] * img_gray.shape[1]
+
+    return qtd_bordas / total_pixels
 
 
-def detectar_area_foto(img):
+def detectar_area_foto_corrigido(img):
+    h, w = img.shape[:2]
+    area_img = h * w
+
     img_gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     blur = cv2.GaussianBlur(img_gray, (15, 15), 0)
 
@@ -98,13 +83,22 @@ def detectar_area_foto(img):
 
     contornos, _ = cv2.findContours(thresh, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
 
-    maior = 0
-    for c in contornos:
-        area = cv2.contourArea(c)
-        if area > maior:
-            maior = area
+    maior_area_foto = 0
 
-    return maior
+    for c in contornos:
+        x, y, w_box, h_box = cv2.boundingRect(c)
+        area = w_box * h_box
+
+        if area > area_img * 0.90:
+            continue
+
+        ratio = h_box / max(w_box, 1)
+
+        if 0.65 < ratio < 0.85:
+            if area > maior_area_foto:
+                maior_area_foto = area
+
+    return maior_area_foto / area_img
 
 
 def obter_classe(img_name: str):
@@ -122,7 +116,7 @@ def processar_imagens():
     imagens = os.listdir(PASTA_IMAGENS)
 
     if len(imagens) == 0:
-        print("❌ Nenhuma imagem encontrada na pasta:", PASTA_IMAGENS)
+        print(" Nenhuma imagem encontrada na pasta:", PASTA_IMAGENS)
         return
 
     print(f"🔍 Processando {len(imagens)} imagens...\n")
@@ -130,6 +124,7 @@ def processar_imagens():
     with open(ARQUIVO_SAIDA, "w", newline="", encoding="utf-8") as arq:
         writer = csv.writer(arq)
 
+        
         header = [
             "imagem",
             "classe",
@@ -143,16 +138,12 @@ def processar_imagens():
             "tem_nacionalidade",
             "qtd_palavras",
             "qtd_numeros",
-            "densidade_texto",
             "brilho_medio",
             "contraste",
-            "ratio_w_h",
-            "ratio_h_w",
-            "bordas",
-            "area_foto",
+            "bordas_normalizado",
+            "area_foto_normalizada",
         ]
 
-        
         writer.writerow(header)
 
         processadas = 0
@@ -162,7 +153,7 @@ def processar_imagens():
 
             img = cv2.imread(caminho)
             if img is None:
-                print("⚠️ Erro ao carregar:", img_name)
+                print(" Erro ao carregar:", img_name)
                 continue
 
             print("→ Extraindo:", img_name)
@@ -175,10 +166,8 @@ def processar_imagens():
             cores_hex = extrair_cores_hex(caminho)
             texto = extrair_texto_avancado(img)
             brilho, contraste = features_brilho_contraste(img_gray)
-            ratio_w_h, ratio_h_w = proporcao_imagem(img)
-            bordas = extrair_bordas(img_gray)
-            area_foto = detectar_area_foto(img)
-          
+            bordas_norm = extrair_bordas_normalizado(img_gray)
+            area_foto = detectar_area_foto_corrigido(img)
 
             writer.writerow([
                 img_name,
@@ -191,19 +180,15 @@ def processar_imagens():
                 texto["tem_nacionalidade"],
                 texto["qtd_palavras"],
                 texto["qtd_numeros"],
-                texto["densidade_texto"],
                 brilho,
                 contraste,
-                ratio_w_h,
-                ratio_h_w,
-                bordas,
+                bordas_norm,
                 area_foto,
-                
             ])
 
             processadas += 1
 
-    print(f"\n🔥 Features extraídas com sucesso ({processadas} imagens).")
+    print(f"\n Features extraídas com sucesso ({processadas} imagens).")
     print("📁 Arquivo salvo em:", ARQUIVO_SAIDA)
 
 
