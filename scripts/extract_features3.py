@@ -6,8 +6,8 @@ import pytesseract
 import colorgram
 import re
 
-PASTA_IMAGENS = "./db/dataset_final_classificados"
-ARQUIVO_SAIDA = "./features_v3.csv"
+PASTA_IMAGENS = "./db/test"
+ARQUIVO_SAIDA = "./test/features_v3.csv"
 
 TEMPLATE_QRCODE = "./utils/template_qr.png"
 TEMPLATE_DIGITAL = "./utils/template_digital.png"
@@ -189,7 +189,7 @@ def processar_imagens():
             processadas += 1
 
     print(f"\n Features extraídas com sucesso ({processadas} imagens).")
-    print("📁 Arquivo salvo em:", ARQUIVO_SAIDA)
+    print("Arquivo salvo em:", ARQUIVO_SAIDA)
 
 
 if __name__ == "__main__":

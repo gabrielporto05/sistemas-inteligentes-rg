@@ -2,7 +2,7 @@ import os
 import glob
 
 # Caminho da pasta
-pasta = "./db/old_rgs"
+pasta = "./db/dataset_final_classificados"
 
 # === ETAPA 1: apagar todos os arquivos que terminam com "_gt_segmentation.jpg" ===
 arquivos_gt = glob.glob(os.path.join(pasta, "**", "*_gt_segmentation.jpg"), recursive=True)
@@ -19,7 +19,7 @@ print(f"\n{len(arquivos_gt)} arquivos '_gt_segmentation.jpg' foram apagados.\n")
 # === ETAPA 2: apagar o excesso de .jpg, mantendo apenas 1000 ===
 arquivos_jpg = sorted(glob.glob(os.path.join(pasta, "**", "*.jpg"), recursive=True))
 
-manter = 1000
+manter = 200
 
 if len(arquivos_jpg) > manter:
     apagar = arquivos_jpg[manter:]
